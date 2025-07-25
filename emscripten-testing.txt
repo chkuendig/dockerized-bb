@@ -1,0 +1,19 @@
+# build toolchain image
+make toolchains
+
+# start container 
+docker run -v ../scummvm-demo/scummvm:/source --name toolchain_emscripten -i -t toolchains/emscripten /bin/bash
+
+# configure
+source "$EMSDK/emsdk_env.sh" #  dist-emscripten target requires EMSDK_NODE to be set
+cd /source
+emconfigure ./configure  --host=wasm32-unknown-emscripten --build=wasm32-unknown-emscripten \
+  --enable-verbose-build --disable-all-engines --enable-engine=testbed,grim \
+  --enable-zlib --enable-png --enable-jpeg --enable-vorbis --enable-gif --enable-freetype2 \
+  --enable-mpeg2 --with-mpeg2-prefix=/usr/local/emscripten/scummvm-libs/lib/ \
+  --enable-a52 --with-a52-prefix=/usr/local/emscripten/scummvm-libs/lib/ \
+  --enable-faad --with-faad-prefix=/usr/local/emscripten/scummvm-libs/lib/ \
+  --enable-theoradec --with-theoradec-prefix=/usr/local/emscripten/scummvm-libs/lib/ 
+
+#make
+  emmake make dist-emscripten
